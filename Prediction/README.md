@@ -46,8 +46,7 @@ Print tables only for -i 100 -tcv 10 -vcv 5
 ```
 python print_tables.py {--latex}
 ```
-## Compute Ablations
-# Only for GBoost
+## Compute Ablations (Only for GBoost)
 ```
 python compute_ablation_gboost.py org -std -ovs -l -i 10 -ab bin ;
 python compute_ablation_gboost.py org -std -ovs -l -i 10 -ab ssi ;
