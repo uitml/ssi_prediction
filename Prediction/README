@@ -1,8 +1,8 @@
-# # Create data
+## Create data
 
 sh Prepare_Data.sh
 
-# # Parameters
+## Parameters
 
 # python compute_{sgd|gboost}.py {prz|org|aug}
 # features: prz (Kocbek), org (weekly w/o augmentation), aug (weekly with augmentation)
@@ -23,7 +23,7 @@ sh Prepare_Data.sh
 # -ab {bin|ssi}   ONLY FOR ABLATION: select a class. Binary is -ab 1,2
 
 
-# # Compute Tables
+## Compute Tables
 
 python compute_sgd.py prz -std -ovs -l -i 100 ;
 python compute_sgd.py org -std -ovs -l -i 100 ;
@@ -42,7 +42,7 @@ python compute_gboost.py org -std -i 100 ;
 # Print tables only for -i 100 -tcv 10 -vcv 5
 python print_tables.py {--latex}
 
-# # Compute Ablations
+## Compute Ablations
 # Only for GBoost
 
 python compute_ablation_gboost.py org -std -ovs -l -i 10 -ab bin ;
