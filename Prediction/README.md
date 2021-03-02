@@ -1,7 +1,7 @@
 ## Create data
-
+```
 sh Prepare_Data.sh
-
+```
 ## Parameters
 
 ```
@@ -9,7 +9,8 @@ python compute_{sgd|gboost}.py {prz|org|aug}
 features: prz (Kocbek), org (weekly w/o augmentation), aug (weekly with augmentation)
 ```
 Options
- -tcv 10   10 fold CV train/test
+```
+-tcv 10   10 fold CV train/test
  -vcv 5    5 fold CV train/valid
  -i 100    100 iterations
  -ovs      over_sampling
@@ -23,7 +24,7 @@ Options
  -s {1|0}  save or not
  
  -ab {bin|ssi}   ONLY FOR ABLATION: select a class. Binary is -ab 1,2
-
+```
 
 ## Compute Tables
 ```
