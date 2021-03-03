@@ -1,6 +1,7 @@
 import argparse,random
 import numpy as np
 from scipy.stats import rankdata 
+from scipy.stats import ttest_ind_from_stats as ttest
 
 # from utils import *
 import argparse
@@ -49,8 +50,10 @@ for f,FEAT in enumerate(['prz+g','prz+s','org+g','org+s']): #,'aug+g','aug+s']):
     SD[FEAT] = {}
     RESULTS = np.load(FNAME[f],allow_pickle=True).item()
     for im,MULTI in enumerate(['bin','ssi','multi','combi']): 
-        MEAN[FEAT][MULTI] = np.nanmean(RESULTS[MULTI]['at'].reshape((-1,3+9*(im>1))),0).reshape((-1,3))
-        SD[FEAT][MULTI]   = np.nanstd (RESULTS[MULTI]['at'].reshape((-1,3+9*(im>1))),0).reshape((-1,3))
+#        MEAN[FEAT][MULTI] = np.nanmean(RESULTS[MULTI]['at'].reshape((-1,3+9*(im>1))),0).reshape((-1,3))
+#        SD[FEAT][MULTI]   = np.nanstd (RESULTS[MULTI]['at'].reshape((-1,3+9*(im>1))),0).reshape((-1,3))
+        MEAN[FEAT][MULTI] = np.nanmean(RESULTS[MULTI]['at'].mean(1), 0).reshape((-1,3))
+        SD[FEAT][MULTI]   = np.nanstd (RESULTS[MULTI]['at'].mean(1), 0).reshape((-1,3))
         if im > 1:
             MEAN[FEAT][MULTI][1:] = MEAN[FEAT][MULTI][1:].T
             SD[FEAT][MULTI][1:]   = SD[FEAT][MULTI][1:].T
@@ -66,7 +69,19 @@ else:
     print(' '*36 + 'AUPRC' + ' '*11 + 'AUROC' + \
     ' '*20 + 'AUPRC' + ' '*10 + 'AUROC' + \
     ' '*20 + 'AUPRC' + ' '*10 + 'AUROC' )
-       
+    
+TTEST = np.zeros( (4,3,2), bool )
+for s in range(2):
+    for im,MULTI in enumerate(['bin','ssi','combi']):
+        COL = []
+        for f,FEAT in enumerate(['prz+g','prz+s','org+g','org+s']): #,'aug+g','aug+s']):
+            COL.append( (MEAN[FEAT][MULTI][0,s], SD[FEAT][MULTI][0,s] ) )
+        COL = np.array(COL)
+        x = COL[:,0].argmax()
+        for f in range(4):
+            TTEST[f,im,s] = ttest( COL[x][0], COL[x][1], 100, COL[f][0], COL[f][1], 100 )[1] > .05
+            
+        
 for f,FEAT in enumerate(['prz+g','prz+s','org+g','org+s']): #,'aug+g','aug+s']):
     LINE = ('Kocbek  ' if FEAT[0] == 'p' else ('Ours+aug' if FEAT[0] == 'a' else 'Ours+ovs'))
     LINE += SEP + ALGO[f]
@@ -76,12 +91,12 @@ for f,FEAT in enumerate(['prz+g','prz+s','org+g','org+s']): #,'aug+g','aug+s']):
             LINE += SEP
             if LATEX:
                 LINE += '$'
-            LINE += ( '\\mathbf{' if LATEX and f == 2 else '' )
+            LINE += ( '\\mathbf{' if LATEX and TTEST[f,im,s] else '' )
             LINE += '{:.3f}'.format(MEAN[FEAT][MULTI][0,s])
-            LINE += ( '}$ $\\mathbf{' if LATEX and f == 2 else '$ $' )
+            LINE += ( '}$ $\\mathbf{' if LATEX and TTEST[f,im,s] else ' ' )
             LINE += ( '\\pm ' if LATEX else '(' )
             LINE += '{:.3f}'.format(SD[FEAT][MULTI][0,s])
-            LINE += ( '}' if LATEX and f == 2 else '' )
+            LINE += ( '}' if LATEX and TTEST[f,im,s] else '' )
             LINE += ( '$' if LATEX else ')' )
     LINE += ' \\\\'
     print(LINE)
@@ -128,6 +143,20 @@ AUPRC               & AUROC
 AUPRC               & AUROC \\\\ \\hline""")
 else:
     print(' '*12 + 'AUPRC'+ ' '*10 + 'AUROC')
+
+
+    
+TTEST = np.zeros( (4,3,2), bool )
+for s in range(2):
+    for SSI in range(1,4):
+        COL = []
+        for f,FEAT in enumerate(['prz+g','prz+s','org+g','org+s']): #,'aug+g','aug+s']):
+            COL.append( (MEAN[FEAT][MULTI][SSI,s], SD[FEAT][MULTI][SSI,s] ) )
+        COL = np.array(COL)
+        x = COL[:,0].argmax()
+        for f in range(4):
+            TTEST[f,SSI-1,s] = ttest( COL[x][0], COL[x][1], 100, COL[f][0], COL[f][1], 100 )[1] > .05
+
 # Print Table 2
 for f,FEAT in enumerate(['prz+g','prz+s','org+g','org+s']): #,'aug+g','aug+s']):
     LINE = ('Kocbek  ' if FEAT[0] == 'p' else ('Ours+aug' if FEAT[0] == 'a' else 'Ours+org'))
@@ -138,12 +167,12 @@ for f,FEAT in enumerate(['prz+g','prz+s','org+g','org+s']): #,'aug+g','aug+s']):
             LINE += SEP
             if LATEX:
                 LINE += '$'
-            LINE += ( '\\mathbf{' if LATEX and f == 2 else '' )
+            LINE += ( '\\mathbf{' if LATEX and TTEST[f,SSI-1,s] else '' )
             LINE += '{:.3f}'.format(MEAN[FEAT][MULTI][SSI, s])
-            LINE += ( '}$ $\\mathbf{' if LATEX and f == 2 else ('$ $' if LATEX else ''))
+            LINE += ( '}$ $\\mathbf{' if LATEX and TTEST[f,SSI-1,s] else ('$ $' if LATEX else ''))
             LINE += ( '\\pm ' if LATEX else '(' )
             LINE += '{:.3f}'.format(SD[FEAT][MULTI][SSI, s])
-            LINE += ( '}' if LATEX and f == 2 else '' )
+            LINE += ( '}' if LATEX and TTEST[f,SSI-1,s] else '' )
             LINE += ( '$' if LATEX else ')' )
         LINE += '\n'
     LINE += ' \\\\'
@@ -266,8 +295,10 @@ for f,FEAT in enumerate(['org','org+log','org+ovs','org+log+ovs']): #,'aug+g','a
     SD[FEAT] = {}
     RESULTS = np.load(FNAME[f],allow_pickle=True).item()
     for im,MULTI in enumerate(['bin','ssi','multi','combi']): 
-        MEAN[FEAT][MULTI] = np.nanmean(RESULTS[MULTI]['at'].reshape((-1,3+9*(im>1))),0).reshape((-1,3))
-        SD[FEAT][MULTI]   = np.nanstd (RESULTS[MULTI]['at'].reshape((-1,3+9*(im>1))),0).reshape((-1,3))
+#        MEAN[FEAT][MULTI] = np.nanmean(RESULTS[MULTI]['at'].reshape((-1,3+9*(im>1))),0).reshape((-1,3))
+#        SD[FEAT][MULTI]   = np.nanstd (RESULTS[MULTI]['at'].reshape((-1,3+9*(im>1))),0).reshape((-1,3))
+        MEAN[FEAT][MULTI] = np.nanmean(RESULTS[MULTI]['at'].mean(1), 0).reshape((-1,3))
+        SD[FEAT][MULTI]   = np.nanstd (RESULTS[MULTI]['at'].mean(1), 0).reshape((-1,3))
         if im > 1:
             MEAN[FEAT][MULTI][1:] = MEAN[FEAT][MULTI][1:].T
             SD[FEAT][MULTI][1:]   = SD[FEAT][MULTI][1:].T
@@ -276,6 +307,17 @@ for f,FEAT in enumerate(['org','org+log','org+ovs','org+log+ovs']): #,'aug+g','a
     
 
 print('\n')
+    
+TTEST = np.zeros( (4,3,2), bool )
+for s in range(2):
+    for im,MULTI in enumerate(['bin','ssi','combi']): 
+        COL = []
+        for f,FEAT in enumerate(['org','org+log','org+ovs','org+log+ovs']): #,'aug+g','aug+s']):
+            COL.append( (MEAN[FEAT][MULTI][0,s], SD[FEAT][MULTI][0,s] ) )
+        COL = np.array(COL)
+        x = COL[:,0].argmax()
+        for f in range(4):
+            TTEST[f,im,s] = ttest( COL[x][0], COL[x][1], 100, COL[f][0], COL[f][1], 100 )[1] > .05
 
 # Print Table 1
 if LATEX:
@@ -296,12 +338,12 @@ for f,FEAT in enumerate(['org','org+log','org+ovs','org+log+ovs']): #,'aug+g','a
             LINE += SEP
             if LATEX:
                 LINE += '$'
-            LINE += ( '\\mathbf{' if LATEX and f == 3 else '' )
+            LINE += ( '\\mathbf{' if LATEX and TTEST[f,im,s] else '' )
             LINE += '{:.3f}'.format(MEAN[FEAT][MULTI][0,s])
-            LINE += ( '}$ $\\mathbf{' if LATEX and f == 3 else '$ $' )
+            LINE += ( '}$ $\\mathbf{' if LATEX and TTEST[f,im,s] else '$ $' )
             LINE += ( '\\pm ' if LATEX else '(' )
             LINE += '{:.3f}'.format(SD[FEAT][MULTI][0,s])
-            LINE += ( '}' if LATEX and f == 3 else '' )
+            LINE += ( '}' if LATEX and TTEST[f,im,s] else '' )
             LINE += ( '$' if LATEX else ')' )
     LINE += ' \\\\'
     print(LINE)
