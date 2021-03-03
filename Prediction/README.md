@@ -2,6 +2,8 @@
 ```
 sh Prepare_Data.sh
 ```
+Note that this step requires the `data_orig` folder with the original data-set which cannot be shared publicly.
+
 ## Parameters
 
 ```
