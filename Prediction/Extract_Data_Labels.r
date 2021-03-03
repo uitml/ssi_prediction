@@ -3,7 +3,7 @@ if("zoo" %in% rownames(installed.packages()) == FALSE) {install.packages("zoo")}
 
 library(data.table)
 library(zoo)
-source("../r_primoz/CMMM_R_code/functions.r")
+source("data_orig/functions.r")
 
 test_names = c( "Hemoglobin", "Leukocytter", "Natrium", "CRP", "Kalium", "Albumin", "Kreatinin", "Trombocytter", "ALAT", "Bilirubin total", "ASAT", "Glukose", "Amylase", "ALP" )
 feat1<-test_names
@@ -14,7 +14,7 @@ inter_per_test<-data.table(feat1,cutoff1,cutoff2,endpoint)
 
 age_vec<- c(50,65,80)
 
-load_BT_ref_table<-"../r_primoz/CMMM_R_code/data_orig/Blood_tests_14_ref_values.csv"
+load_BT_ref_table<-"data_orig/Blood_tests_14_ref_values.csv"
 ##Preprocess
 BT_ref_table<-read.csv(load_BT_ref_table,header=T)[,1:7]
 tmp<-unlist(strsplit(as.character(BT_ref_table$Sex),","))
@@ -28,8 +28,8 @@ BT_ref_table$TestType<-as.character(BT_ref_table$TestType)
 ################################################################################################
 # Train Set
 
-load_data_lab_res<-"../r_primoz/CMMM_R_code/data_orig/WoundInf_Train_Tests.tsv"
-load_data_labels<-"../r_primoz/CMMM_R_code/data_orig/WoundInf_Train_Labels.tsv"
+load_data_lab_res<-"data_orig/WoundInf_Train_Tests.tsv"
+load_data_labels<-"data_orig/WoundInf_Train_Labels.tsv"
 
 save_res<-"data/Train_Raw.csv"
 save_labels<-"data/Train_Labels.csv"
@@ -108,8 +108,8 @@ print("Saved Train Primoz")
 ################################################################################################
 # Eval Set
 
-load_data_test_lab_res<-"../r_primoz/CMMM_R_code/data_orig/WoundInf_Eval_Tests.tsv"
-load_data_test_labels<-"../r_primoz/CMMM_R_code/data_orig/WoundInf_Eval_Label+.csv"
+load_data_test_lab_res<-"data_orig/WoundInf_Eval_Tests.tsv"
+load_data_test_labels<-"data_orig/WoundInf_Eval_Label+.csv"
 
 save_test_res<-"data/Eval_Raw.csv"
 save_test_labels<-"data/Eval_Labels.csv"
